@@ -22,7 +22,8 @@ def prepare_devices_and_models(config):
     """
     desired_gpus = config.get('num_gpus', 1)
     device_count = torch.cuda.device_count()
-    use_multi_gpu = config.get('use_multi_gpu', False) and (device_count > 1)
+    # use_multi_gpu = config.get('use_multi_gpu', False) and (device_count > 1)
+    use_multi_gpu = config.get('use_multi_gpu', False)
 
     devices = [torch.device(f'cuda:{i}') for i in range(min(device_count, 4))]
     while len(devices) < 4:
