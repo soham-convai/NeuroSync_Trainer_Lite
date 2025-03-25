@@ -60,11 +60,14 @@ def train_model(config, model_0, model_1, model_2, model_3, dataloader, val_data
                 
                 if loss < best_train_loss:
                     best_train_loss = loss
+                    
+                    model_state_dict = dict()
+                    
+                    for model_idx, model in enumerate(models_list):
+                        model_state_dict[f"model_{model_idx}_state_dict"] = model.state_dict()
+                        
                     torch.save({
-                        "model_0_state_dict": model_0.state_dict(),
-                        "model_1_state_dict": model_1.state_dict(),
-                        "model_2_state_dict": model_2.state_dict(),
-                        "model_3_state_dict": model_3.state_dict(),
+                        **model_state_dict,
                         "optimizer_state_dict": optimizer.state_dict(),
                         "scheduler_state_dict": scheduler.state_dict(),
                         "epoch": epoch,
@@ -76,11 +79,15 @@ def train_model(config, model_0, model_1, model_2, model_3, dataloader, val_data
                     
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss
+                    
+                    
+                    model_state_dict = dict()
+                    
+                    for model_idx, model in enumerate(models_list):
+                        model_state_dict[f"model_{model_idx}_state_dict"] = model.state_dict()
+                        
                     torch.save({
-                        "model_0_state_dict": model_0.state_dict(),
-                        "model_1_state_dict": model_1.state_dict(),
-                        "model_2_state_dict": model_2.state_dict(),
-                        "model_3_state_dict": model_3.state_dict(),
+                        **model_state_dict,
                         "optimizer_state_dict": optimizer.state_dict(),
                         "scheduler_state_dict": scheduler.state_dict(),
                         "epoch": epoch,
