@@ -129,10 +129,7 @@ def train_model(config, model_0, model_1, model_2, model_3, dataloader, val_data
                 
             scheduler.step()
             
-            
-            
-            
-            
+              
             # save_checkpoint_and_data(epoch, model_0, optimizer, scheduler, batch_step, config, lock, device0)
     save_final_model(model_0)
     return batch_step
