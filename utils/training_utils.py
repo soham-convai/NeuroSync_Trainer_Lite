@@ -353,7 +353,7 @@ def train_one_epoch_multi_gpu(
     # save_gradient_norm_plot(epoch, gradient_norms, save_dir="dataset/validation_plots/gradient_norms")
     # save_loss_plot(epoch, train_steps, train_losses, val_steps, val_losses, save_dir="dataset/validation_plots/loss")
     print_epoch_summary(epoch, total_epochs, epoch_loss, steps_per_epoch, end_time - start_time)
-    return batch_step, batch_loss.item(), val_loss.item()
+    return batch_step, batch_loss, val_loss.item()
 
 
 
