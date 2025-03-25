@@ -64,6 +64,7 @@ def train_model(config, model_0, model_1, model_2, model_3, dataloader, val_data
                     model_state_dict = dict()
                     
                     for model_idx, model in enumerate(models_list):
+                        if not model: continue
                         model_state_dict[f"model_{model_idx}_state_dict"] = model.state_dict()
                         
                     torch.save({
@@ -84,6 +85,7 @@ def train_model(config, model_0, model_1, model_2, model_3, dataloader, val_data
                     model_state_dict = dict()
                     
                     for model_idx, model in enumerate(models_list):
+                        if not model: continue
                         model_state_dict[f"model_{model_idx}_state_dict"] = model.state_dict()
                         
                     torch.save({
