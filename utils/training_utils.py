@@ -48,13 +48,50 @@ def train_model(config, model_0, model_1, model_2, model_3, dataloader, val_data
         for epoch in range(start_epoch, n_epochs):
             if use_multi_gpu:
                 # Gather models and corresponding devices that are not None:
+                
+                print("############## TRAINING IN MULTI-GPU MODEL #########")
                 models_list = [m for m in (model_0, model_1, model_2, model_3) if m is not None]
                 used_devices = [d for m, d in zip((model_0, model_1, model_2, model_3), devices) if m is not None]
-                batch_step = train_one_epoch_multi_gpu(
+                batch_step, loss, val_loss = train_one_epoch_multi_gpu(
                     epoch, models_list, dataloader, criterion, optimizer, used_devices, clip=2.0,
                     batch_step=batch_step, pbar=pbar, total_epochs=n_epochs, use_amp=use_amp,
                     grad_scaler=scaler, val_dataloader=val_dataloader, validation_interval=20
                 )
+                
+                if loss < best_train_loss:
+                    best_train_loss = loss
+                    torch.save({
+                        "model_0_state_dict": model_0.state_dict(),
+                        "model_1_state_dict": model_1.state_dict(),
+                        "model_2_state_dict": model_2.state_dict(),
+                        "model_3_state_dict": model_3.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "scheduler_state_dict": scheduler.state_dict(),
+                        "epoch": epoch,
+                        "batch_step": batch_step,
+                        "best_train_loss": best_train_loss
+                    }, os.path.join(config['model_path'], "best_train_model.pth"))
+                    generate_and_save_facial_data(epoch, config['audio_path'], model_0, config['ground_truth_path'], lock, "train", device0)    
+                    
+                    
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+                    torch.save({
+                        "model_0_state_dict": model_0.state_dict(),
+                        "model_1_state_dict": model_1.state_dict(),
+                        "model_2_state_dict": model_2.state_dict(),
+                        "model_3_state_dict": model_3.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "scheduler_state_dict": scheduler.state_dict(),
+                        "epoch": epoch,
+                        "batch_step": batch_step,
+                        "best_val_loss": best_val_loss
+                    }, os.path.join(config['model_path'], "best_val_model.pth"))    
+                    generate_and_save_facial_data(epoch, config['audio_path'],  model_0, config['ground_truth_path'], lock, "val", device0)
+                
+                # save_checkpoint_and_data(epoch, model_0, optimizer, scheduler, batch_step, config, lock, device0)
+                
+                
             else:
                 batch_step, loss, val_loss = train_one_epoch(
                     epoch, model=model_0, dataloader=dataloader, criterion=criterion, optimizer=optimizer,
@@ -269,12 +306,13 @@ def train_one_epoch_multi_gpu(
         optimizer.zero_grad()
         current_step = batch_step + (epoch * steps_per_epoch) + step_idx
         losses = _compute_losses_multi_gpu(models, inputs, targets, criterion, current_step, total_steps, use_amp)
+        
         pre_clip_norm = _backward_and_step_multi_gpu(losses, models, optimizer, devices, clip, use_amp, grad_scaler)
 
-        print_training_progress(step_idx, pre_clip_norm, sum(l.item() for l in losses)/n,
-                                  batch_step, epoch, total_epochs, steps_per_epoch, pbar)
+        # print_training_progress(step_idx, pre_clip_norm, sum(l.item() for l in losses)/n,
+        #                           batch_step, epoch, total_epochs, steps_per_epoch, pbar)
         gradient_norms.append(pre_clip_norm)
-
+        
         _sync_models(models)
 
         batch_loss = sum(l.item() for l in losses) / n
@@ -283,7 +321,18 @@ def train_one_epoch_multi_gpu(
         train_losses.append(batch_loss)
         gradient_norms.append(calculate_gradient_norm(models[0]))  
         batch_step += 1
-
+       
+        for loss in losses:
+             
+            wandb.log({
+                "train_loss": loss.item(),
+                "gradient_norm": pre_clip_norm,
+                "learning_rate": optimizer.param_groups[0]['lr'],
+                "batch": batch_step / n,
+                "epoch": epoch
+            })
+       
+       
         if val_dataloader is not None and (step_idx % validation_interval == 0):
             try:
                 val_batch = next(val_iter)
@@ -291,16 +340,23 @@ def train_one_epoch_multi_gpu(
                 val_iter = iter(val_dataloader)
                 val_batch = next(val_iter)
             val_loss = _run_validation_multi_gpu(models[0], val_batch, devices[0], use_amp, criterion)
-            print(f"[Epoch {epoch} - Step {step_idx}] Validation Loss: {val_loss.item():.4f}")
+            # print(f"[Epoch {epoch} - Step {step_idx}] Validation Loss: {val_loss.item():.4f}")
             val_steps.append(batch_step)
             val_losses.append(val_loss.item())
+            
+            
+            wandb.log({
+                "val_loss": val_loss.item(),
+                "batch": batch_step,
+                "epoch": epoch
+            })
 
     end_time = time.time()
-    print_epoch_summary(epoch, total_epochs, epoch_loss, steps_per_epoch, end_time - start_time)
-    save_gradient_norm_plot(epoch, gradient_norms, save_dir="dataset/validation_plots/gradient_norms")
-    save_loss_plot(epoch, train_steps, train_losses, val_steps, val_losses, save_dir="dataset/validation_plots/loss")
+    # print_epoch_summary(epoch, total_epochs, epoch_loss, steps_per_epoch, end_time - start_time)
+    # save_gradient_norm_plot(epoch, gradient_norms, save_dir="dataset/validation_plots/gradient_norms")
+    # save_loss_plot(epoch, train_steps, train_losses, val_steps, val_losses, save_dir="dataset/validation_plots/loss")
 
-    return batch_step
+    return batch_step, batch_loss.item(), val_loss.item()
 
 
 

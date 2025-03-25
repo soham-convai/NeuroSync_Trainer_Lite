@@ -20,7 +20,7 @@ from dataset.data_processing import load_data, process_folder
 # of sliding window segments (of micro_batch_size frames) and record an index
 # entry for each complete window. (Incomplete windows are dropped.)
 # =============================================================================
-def preprocess_and_cache_to_bin(config, force_reprocess=True):
+def preprocess_and_cache_to_bin(config, force_reprocess=False):
     """
     Process each folder’s full data arrays, save them as .npy files, and build a global
     index mapping each micro-batch (of micro_batch_size frames) to its source file and start index.
@@ -162,7 +162,7 @@ class InMemoryAudioFacialDataset(Dataset):
 # Incomplete windows are dropped (no reflection padding).
 # =============================================================================
 class LazyAudioFacialDataset(Dataset):
-    def __init__(self, config, preload_index=True, force_reprocess=True):
+    def __init__(self, config, preload_index=True, force_reprocess=False):
         """
         Parameters:
           config         - dict with keys: 'root_dir', 'sr', 'micro_batch_size', etc.

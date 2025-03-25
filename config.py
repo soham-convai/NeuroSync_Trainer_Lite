@@ -45,21 +45,21 @@ training_config = {
     'w1': 1.0,               # Weight for Huber loss
     'w2': 1.0, 
     'w3': 1.0, 
-    'use_multi_gpu' : False,   
+    'use_multi_gpu' : True,   
     'num_gpus' : 1,               
     'warmup_epochs': 0, 
     'input_dim': 256,  
     'frame_size': 128,
     # 'ffmpeg_path': ffmpeg_path,  
-    'root_dir': os.path.join("dataset", "data_mh"),     
-    'model_path': os.path.join("out", "model.pth"),
-    'audio_path': os.path.join("dataset", "test_set", "audio.wav"),
+    'root_dir': os.path.join("..", "..", "Neurosync_Data_Debayan", "in_folders_44800" ),     
+    'model_path': os.path.join("out"),
+    'audio_path': os.path.join("..", "..", "Neurosync_Data_small", "folder","df_audio_file_6.wav"),
     'ground_truth_path': os.path.join("dataset", "test_set", "testset.csv"),
-    'checkpoint_path': os.path.join("out", "checkpoints", "checkpoint.pth"), 
+#     'checkpoint_path': os.path.join("out", "checkpoints", "checkpoint.pth"), 
     'use_amp': True,
-    'in_memory' : True, # if true, use in memory data storage - requires a lot of system memory if your dataset is large and is no quicker than if using lazy loading - just dont ;)
-    'freeze_arkit_generator': True,
+    'in_memory' : False, # if true, use in memory data storage - requires a lot of system memory if your dataset is large and is no quicker than if using lazy loading - just dont ;)
+    'freeze_arkit_generator': False,
     'with_emotions': False,
-    'arkit_generator_model_path': os.path.join("out", "model.pth")
+    'arkit_generator_model_path': os.path.join("model.pth")
 }
 
