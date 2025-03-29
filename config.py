@@ -29,7 +29,7 @@ import platform
 
 training_config = { 
     'mode': 'scratch',       # Training mode: 'scratch' or 'resume'
-    'sr': 16000,             # Sample rate 
+    'sr': 88200,             # Sample rate 
     'frame_rate': 30,        # Frame rate for facial data
     'hidden_dim': 1024,      # Hidden dimension for the model ### increases increase GPU memory requirements a lot.
     'n_layers': 8,           # Number of layers in the model
@@ -40,7 +40,8 @@ training_config = {
     'learning_rate': 5e-4,   # Learning rate
     'weight_decay': 1e-5,    # Weight decay for the optimizer
     'n_epochs': 50,          # Number of training epochs
-    'output_dim': 142 ,        # Use 61 if training on iPhone data alone. On the model available on huggingface, this is 68 because we add dimensions for emotion. hstack extra data to out for more data out.       
+    'mh_training': False,
+    'output_dim': 61 ,        # Use 61 if training on iPhone data alone. On the model available on huggingface, this is 68 because we add dimensions for emotion. hstack extra data to out for more data out.       
     'delta': 1,              # Delta for Huber loss
     'w1': 1.0,               # Weight for Huber loss
     'w2': 1.0, 
