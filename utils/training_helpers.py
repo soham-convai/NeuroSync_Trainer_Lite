@@ -29,10 +29,21 @@ def prepare_devices_and_models(config):
     while len(devices) < 4:
         devices.append(None)
 
-    model_0 = build_mh_model(config, devices[0] if devices[0] else torch.device('cpu'))
-    model_1 = build_mh_model(config, devices[1]) if (use_multi_gpu and desired_gpus >= 2 and devices[1]) else None
-    model_2 = build_mh_model(config, devices[2]) if (use_multi_gpu and desired_gpus >= 3 and devices[2]) else None
-    model_3 = build_mh_model(config, devices[3]) if (use_multi_gpu and desired_gpus >= 4 and devices[3]) else None
+    mh_training = config.get('mh_training', True)
+    if not mh_training:
+        
+        assert config.get("output_dim") == 61
+        model_0 = build_mh_model(config, devices[0] if devices[0] else torch.device('cpu'))
+        model_1 = build_mh_model(config, devices[1]) if (use_multi_gpu and desired_gpus >= 2 and devices[1]) else None
+        model_2 = build_mh_model(config, devices[2]) if (use_multi_gpu and desired_gpus >= 3 and devices[2]) else None
+        model_3 = build_mh_model(config, devices[3]) if (use_multi_gpu and desired_gpus >= 4 and devices[3]) else None
+        
+    else: 
+        assert config.get("output_dim") == 275
+        model_0 = build_model(config, devices[0] if devices[0] else torch.device('cpu'))
+        model_1 = build_model(config, devices[1]) if (use_multi_gpu and desired_gpus >= 2 and devices[1]) else None
+        model_2 = build_model(config, devices[2]) if (use_multi_gpu and desired_gpus >= 3 and devices[2]) else None
+        model_3 = build_model(config, devices[3]) if (use_multi_gpu and desired_gpus >= 4 and devices[3]) else None
 
     return devices, use_multi_gpu, (model_0, model_1, model_2, model_3)
 

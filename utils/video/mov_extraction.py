@@ -20,10 +20,11 @@ def find_files(folder_path):
         if file.endswith('.wav'):
             wav_path = os.path.join(folder_path, file)
         elif file.endswith('.csv'):
-            if 'iPhone_cal' in file:
-                facial_csv_path = os.path.join(folder_path, file)
-            else:
-                other_csv_path = os.path.join(folder_path, file)
+            # if 'iPhone_cal' in file:
+            #     facial_csv_path = os.path.join(folder_path, file)
+            # else:
+            #     other_csv_path = os.path.join(folder_path, file)
+            facial_csv_path = os.path.join(folder_path, file)
         elif file.endswith('.json'):
             facial_json_path = os.path.join(folder_path, file)
     # Return audio_features_csv_path regardless of its existence
