@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 from torch.cuda.amp import GradScaler, autocast
-from utils.model_utils import build_model, build_mh_model, calculate_gradient_norm, init_weights
+from utils.model_utils import build_model, build_mh_model, build_cnn_model, calculate_gradient_norm, init_weights
 from utils.checkpoint_utils import load_checkpoint
 
 def prepare_devices_and_models(config):
@@ -40,10 +40,17 @@ def prepare_devices_and_models(config):
         
     else: 
         assert config.get("output_dim") == 61
-        model_0 = build_model(config, devices[0] if devices[0] else torch.device('cpu'))
-        model_1 = build_model(config, devices[1]) if (use_multi_gpu and desired_gpus >= 2 and devices[1]) else None
-        model_2 = build_model(config, devices[2]) if (use_multi_gpu and desired_gpus >= 3 and devices[2]) else None
-        model_3 = build_model(config, devices[3]) if (use_multi_gpu and desired_gpus >= 4 and devices[3]) else None
+        
+        if config.get("use_cnn_model", False): 
+            model_0 = build_cnn_model(config, devices[0] if devices[0] else torch.device('cpu'))
+            model_1 = build_cnn_model(config, devices[1]) if (use_multi_gpu and desired_gpus >= 2 and devices[1]) else None
+            model_2 = build_cnn_model(config, devices[2]) if (use_multi_gpu and desired_gpus >= 3 and devices[2]) else None
+            model_3 = build_cnn_model(config, devices[3]) if (use_multi_gpu and desired_gpus >= 4 and devices[3]) else None
+        else: 
+            model_0 = build_model(config, devices[0] if devices[0] else torch.device('cpu'))
+            model_1 = build_model(config, devices[1]) if (use_multi_gpu and desired_gpus >= 2 and devices[1]) else None
+            model_2 = build_model(config, devices[2]) if (use_multi_gpu and desired_gpus >= 3 and devices[2]) else None
+            model_3 = build_model(config, devices[3]) if (use_multi_gpu and desired_gpus >= 4 and devices[3]) else None
 
     return devices, use_multi_gpu, (model_0, model_1, model_2, model_3)
 

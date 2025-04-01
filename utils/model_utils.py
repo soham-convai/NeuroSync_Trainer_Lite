@@ -9,6 +9,7 @@ import torch.optim as optim
 import torch.nn as nn
 from utils.model import Seq2Seq, Encoder, Decoder, Loss
 from utils.model_mh import Seq2Seq_MH
+from utils.model_cnn import Seq2Seq_CNN, EncoderCNN, DecoderCNN
 
 def prepare_training_components(config, model):
     criterion = Loss(delta=config['delta'], w1=config['w1'], w2=config['w2'])
@@ -27,6 +28,13 @@ def build_model(config, device):
     encoder = Encoder(config['input_dim'], config['hidden_dim'], config['n_layers'], config['num_heads'], config['dropout'])
     decoder = Decoder(config['output_dim'], config['hidden_dim'], config['n_layers'], config['num_heads'], config['dropout'])
     model = Seq2Seq(encoder, decoder, device).to(device)
+    return model
+
+def build_cnn_model(config, device):
+    print("Building CNN model..")
+    encoder = EncoderCNN(config['input_dim'], config['hidden_dim'], config['n_layers'], config['dropout'])
+    decoder = DecoderCNN(config['output_dim'], config['hidden_dim'], config['n_layers'], config['dropout'])
+    model = Seq2Seq_CNN(encoder, decoder, device).to(device)
     return model
 
 
